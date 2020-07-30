@@ -1,4 +1,4 @@
-package br.com.order-queue;
+package br.com.order;
 
 import static org.junit.Assert.assertTrue;
 

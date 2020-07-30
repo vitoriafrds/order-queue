@@ -3,6 +3,7 @@ package br.com.order.configuration;
 import com.amazon.sqs.javamessaging.SQSConnectionFactory;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
 import com.amazonaws.internal.StaticCredentialsProvider;
 import com.amazonaws.regions.Region;
@@ -23,10 +24,10 @@ import javax.jms.Session;
 @EnableJms
 public class JMSConfiguration {
 
-    @Value("${amazon.accessKey}")
+    @Value("${aws.accessKeyId}")
     private String accessKey;
 
-    @Value("${amazon.secretKey}")
+    @Value("${aws.secretKey}")
     private String secretKey;
 
     @Autowired
@@ -36,16 +37,14 @@ public class JMSConfiguration {
     public SQSConnectionFactory createConnectionFactory() {
 
         return SQSConnectionFactory.builder().withRegion(Region.getRegion(Regions.SA_EAST_1))
-                .withAWSCredentialsProvider(new StaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey))).build();
+                .withAWSCredentialsProvider(new StaticCredentialsProvider(new BasicAWSCredentials(accessKey,secretKey)))
+                .build();
     }
 
     @Bean
-    public DefaultJmsListenerContainerFactory jmsListener() {
+    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setConnectionFactory(this.connectionFactory);
-        factory.setDestinationResolver(new DynamicDestinationResolver());
-        factory.setSessionAcknowledgeMode(Session.AUTO_ACKNOWLEDGE);
-
         return factory;
     }
 
@@ -53,4 +52,5 @@ public class JMSConfiguration {
     public JmsTemplate defaultJmsTemplate(){
         return new JmsTemplate(this.connectionFactory);
     }
+
 }
